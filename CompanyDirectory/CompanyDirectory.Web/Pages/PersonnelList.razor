@@ -1,0 +1,53 @@
+﻿@page "/"
+@inject HttpClient Http
+
+<PageTitle>Personnel List</PageTitle>
+
+
+<h3>Personnel List</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Title</th>
+        </tr>
+    </thead>
+    <tbody>
+
+
+
+        @foreach (var personnel in personnelList)
+        {
+            <tr>
+                <td><img src="@personnel.Image" class="thumbnail" /></td>
+                <td><a href="/personnel/@personnel.Id">@personnel.FirstName @personnel.LastName</a></td>
+                <td>@personnel.Title</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private Personnel[]? personnelList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        personnelList = await Http.GetFromJsonAsync<Personnel[]>("sample-data/personnel.json");
+    }
+
+    public class Personnel
+    {
+        public int Id { get; set; }
+
+        public string? Image { get; set; }
+
+        public string? FirstName { get; set; }
+
+        public string? LastName { get; set; }
+
+        public string? Title { get; set; }
+
+    }
+}
