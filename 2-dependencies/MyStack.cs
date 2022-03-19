@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using Pulumi;
 using Pulumi.AzureNative.Resources;
 using Pulumi.AzureNative.Storage;
@@ -9,7 +9,17 @@ class MyStack : Stack
     public MyStack()
     {
         // Create an Azure Resource Group
-        var resourceGroup = new ResourceGroup("resourceGroup");
+        var resourceGroup = new ResourceGroup("rg-pulumi-demo", new ResourceGroupArgs
+        {
+            Tags = new Dictionary<string,string>
+            {
+                {"workload", "pulumi demo"},
+                {"environment", "dev"},
+                {"cost center", "IT"},
+                {"owner", "Jake Adams"},
+                {"demo", "true"}
+            }
+        });
 
         // Create an Azure resource (Storage Account)
         var storageAccount = new StorageAccount("sa", new StorageAccountArgs
@@ -19,24 +29,39 @@ class MyStack : Stack
             {
                 Name = SkuName.Standard_LRS
             },
-            Kind = Kind.StorageV2
+            Kind = Kind.StorageV2,
+            AccessTier = AccessTier.Hot,
+            AllowBlobPublicAccess = true,
+            EnableHttpsTrafficOnly = true,
+
         });
 
-        // Export the primary key of the Storage Account
-        this.PrimaryStorageKey = Output.Tuple(resourceGroup.Name, storageAccount.Name).Apply(names =>
-            Output.CreateSecret(GetStorageAccountPrimaryKey(names.Item1, names.Item2)));
+        // var staticWebsite = new StorageAccountStaticWebsite("stapp-pulumi-demo", new StorageAccountStaticWebsiteArgs
+        // {
+        //     AccountName 
+        // }),
+
+        var storageContainer = new BlobContainer("test", new BlobContainerArgs
+        {
+            ResourceGroupName = resourceGroup.Name,
+            AccountName = storageAccount.Name,
+            PublicAccess = PublicAccess.Container,
+        });
+
+        
+        var indexBlob = new Blob("index.html", new BlobArgs
+        {
+            ResourceGroupName = resourceGroup.Name,
+            AccountName = storageAccount.Name,
+            ContainerName = storageContainer.Name,
+            Type = BlobType.Block,
+            Source = new StringAsset("<html><body><h1>Hello World</h1></body></html>"),
+            ContentType = "text/html"
+        });
+
+        IndexPublicUrl = indexBlob.Url;
     }
 
     [Output]
-    public Output<string> PrimaryStorageKey { get; set; }
-
-    private static async Task<string> GetStorageAccountPrimaryKey(string resourceGroupName, string accountName)
-    {
-        var accountKeys = await ListStorageAccountKeys.InvokeAsync(new ListStorageAccountKeysArgs
-        {
-            ResourceGroupName = resourceGroupName,
-            AccountName = accountName
-        });
-        return accountKeys.Keys[0].Value;
-    }
+    public Output<string> IndexPublicUrl { get; set; }
 }
