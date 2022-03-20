@@ -9,20 +9,10 @@ class MyStack : Stack
     public MyStack()
     {
         // Create an Azure Resource Group
-        var resourceGroup = new ResourceGroup("rg-pulumi-demo", new ResourceGroupArgs
-        {
-            Tags = new Dictionary<string, string>
-            {
-                {"workload", "pulumi demo"},
-                {"environment", "dev"},
-                {"cost center", "IT"},
-                {"owner", "Jake Adams"},
-                {"demo", "true"}
-            }
-        });
+        var resourceGroup = new ResourceGroup("rg-pulumi-demo");
 
         // Create an Azure resource (Storage Account)
-        var storageAccount = new StorageAccount("sa", new StorageAccountArgs
+        var storageAccount = new StorageAccount("stpulumidemo", new StorageAccountArgs
         {
             ResourceGroupName = resourceGroup.Name,
             Sku = new SkuArgs
@@ -30,7 +20,6 @@ class MyStack : Stack
                 Name = SkuName.Standard_LRS
             },
             Kind = Kind.StorageV2,
-            AccessTier = AccessTier.Hot,
             AllowBlobPublicAccess = true,
             EnableHttpsTrafficOnly = true,
             MinimumTlsVersion = MinimumTlsVersion.TLS1_2
@@ -41,19 +30,11 @@ class MyStack : Stack
             ResourceGroupName = resourceGroup.Name,
             AccountName = storageAccount.Name,
             IndexDocument = "index.html"
-
         });
-
-        // var storageContainer = new BlobContainer("$web", new BlobContainerArgs
-        // {
-        //     ResourceGroupName = resourceGroup.Name,
-        //     AccountName = storageAccount.Name,
-        //     PublicAccess = PublicAccess.Container,
-        // });
-
 
         var indexBlob = new Blob("index.html", new BlobArgs
         {
+            // BlobName = staticWebsite.IndexDocument.Apply(i=>i.Value),
             ResourceGroupName = resourceGroup.Name,
             AccountName = storageAccount.Name,
             ContainerName = staticWebsite.ContainerName,

@@ -1,28 +1,21 @@
+using System.Linq;
+using System.IO;
 using System.Collections.Generic;
 using Pulumi;
 using Pulumi.AzureNative.Resources;
 using Pulumi.AzureNative.Storage;
 using Pulumi.AzureNative.Storage.Inputs;
+using MimeTypes;
 
 class MyStack : Stack
 {
     public MyStack()
     {
         // Create an Azure Resource Group
-        var resourceGroup = new ResourceGroup("rg-pulumi-demo", new ResourceGroupArgs
-        {
-            Tags = new Dictionary<string, string>
-            {
-                {"workload", "pulumi demo"},
-                {"environment", "dev"},
-                {"cost center", "IT"},
-                {"owner", "Jake Adams"},
-                {"demo", "true"}
-            }
-        });
+        var resourceGroup = new ResourceGroup("rg-pulumi-demo");
 
         // Create an Azure resource (Storage Account)
-        var storageAccount = new StorageAccount("sa", new StorageAccountArgs
+        var storageAccount = new StorageAccount("sapulumidemo", new StorageAccountArgs
         {
             ResourceGroupName = resourceGroup.Name,
             Sku = new SkuArgs
@@ -44,27 +37,55 @@ class MyStack : Stack
 
         });
 
-        // var storageContainer = new BlobContainer("$web", new BlobContainerArgs
-        // {
-        //     ResourceGroupName = resourceGroup.Name,
-        //     AccountName = storageAccount.Name,
-        //     PublicAccess = PublicAccess.Container,
-        // });
-
-
-        var indexBlob = new Blob("index.html", new BlobArgs
+        var wwwRoot = new DirectoryInfo("wwwroot");
+        IEnumerable<FileInfo> files = wwwRoot.EnumerateFiles("*.*", SearchOption.AllDirectories);
+        foreach(FileInfo file in files)
         {
-            ResourceGroupName = resourceGroup.Name,
-            AccountName = storageAccount.Name,
-            ContainerName = staticWebsite.ContainerName,
-            Type = BlobType.Block,
-            Source = new StringAsset("<html><body><h1>Hello World</h1></body></html>"),
-            ContentType = "text/html"
-        });
+
+            new Blob(Path.GetRelativePath(wwwRoot.FullName, file.FullName), new BlobArgs
+            {
+                ResourceGroupName = resourceGroup.Name,
+                AccountName = storageAccount.Name,
+                ContainerName = staticWebsite.ContainerName,
+                Type = BlobType.Block,
+                Source = new FileAsset(file.FullName),
+                ContentType = GetMimeType(file.Extension)
+                // ContentType = MimeTypeMap.GetMimeType(file.Extension)
+            });
+        }
+
+        // new DirectoryInfo("wwwroot").EnumerateFiles("*.*", SearchOption.AllDirectories)
+        //     .Select(file=> new Blob(Path.GetRelativePath(wwwRoot.FullName, file.FullName), 
+                //new BlobArgs
+                // {
+                //     ResourceGroupName = resourceGroup.Name,
+                //     AccountName = storageAccount.Name,
+                //     ContainerName = staticWebsite.ContainerName,
+                //     Type = BlobType.Block,
+                //     Source = new FileAsset(file.FullName),
+                //     ContentType = MimeTypeMap.GetMimeType(file.Extension)
+        // }));
 
         this.WebsiteUrl = storageAccount.PrimaryEndpoints.Apply(primaryEndpoints => primaryEndpoints.Web);
     }
 
     [Output]
     public Output<string> WebsiteUrl { get; set; }
+
+    private string GetMimeType(string extension)
+    {
+        switch (extension.ToLower())
+        {
+             case ".html":
+                return "text/html";
+             case ".css":
+                return "text/css";
+            case ".js":
+                return "application/javascript";
+            case ".jpg":
+                return "image/jpeg";
+            default:
+                return "application/octet-stream";
+        }
+    }
 }

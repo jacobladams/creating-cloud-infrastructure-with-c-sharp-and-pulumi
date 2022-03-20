@@ -9,20 +9,10 @@ class MyStack : Stack
     public MyStack()
     {
         // Create an Azure Resource Group
-        var resourceGroup = new ResourceGroup("rg-pulumi-demo", new ResourceGroupArgs
-        {
-            Tags = new Dictionary<string,string>
-            {
-                {"workload", "pulumi demo"},
-                {"environment", "dev"},
-                {"cost center", "IT"},
-                {"owner", "Jake Adams"},
-                {"demo", "true"}
-            }
-        });
+        var resourceGroup = new ResourceGroup("rg-pulumi-demo");
 
         // Create an Azure resource (Storage Account)
-        var storageAccount = new StorageAccount("sa", new StorageAccountArgs
+        var storageAccount = new StorageAccount("stpulumidemo", new StorageAccountArgs
         {
             ResourceGroupName = resourceGroup.Name,
             Sku = new SkuArgs
@@ -30,38 +20,21 @@ class MyStack : Stack
                 Name = SkuName.Standard_LRS
             },
             Kind = Kind.StorageV2,
-            AccessTier = AccessTier.Hot,
-            AllowBlobPublicAccess = true,
-            EnableHttpsTrafficOnly = true,
-
         });
-
-        // var staticWebsite = new StorageAccountStaticWebsite("stapp-pulumi-demo", new StorageAccountStaticWebsiteArgs
-        // {
-        //     AccountName 
-        // }),
 
         var storageContainer = new BlobContainer("test", new BlobContainerArgs
         {
             ResourceGroupName = resourceGroup.Name,
             AccountName = storageAccount.Name,
-            PublicAccess = PublicAccess.Container,
         });
-
         
-        var indexBlob = new Blob("index.html", new BlobArgs
+        var indexBlob = new Blob("test.txt", new BlobArgs
         {
             ResourceGroupName = resourceGroup.Name,
             AccountName = storageAccount.Name,
             ContainerName = storageContainer.Name,
             Type = BlobType.Block,
-            Source = new StringAsset("<html><body><h1>Hello World</h1></body></html>"),
-            ContentType = "text/html"
+            Source = new StringAsset("test 123"),
         });
-
-        IndexPublicUrl = indexBlob.Url;
     }
-
-    [Output]
-    public Output<string> IndexPublicUrl { get; set; }
 }
