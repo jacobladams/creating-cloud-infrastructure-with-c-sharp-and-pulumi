@@ -15,7 +15,7 @@ class MyStack : Stack
         var resourceGroup = new ResourceGroup("rg-pulumi-demo");
 
         // Create an Azure resource (Storage Account)
-        var storageAccount = new StorageAccount("sapulumidemo", new StorageAccountArgs
+        var storageAccount = new StorageAccount("stpulumidemo", new StorageAccountArgs
         {
             ResourceGroupName = resourceGroup.Name,
             Sku = new SkuArgs

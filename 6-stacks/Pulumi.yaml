@@ -1,5 +1,3 @@
-name: 5-three-tier-web-app
+name: 7-stacks
 runtime: dotnet
 description: A minimal Azure Native C# Pulumi program
-
-

@@ -1,0 +1,10 @@
+@font-face {
+  font-family: StarJedi;
+  src: url(./fonts/Starjedi.ttf);
+}
+
+html,
+body {
+  font-family: StarJedi;
+  background-color: #ccc;
+}

@@ -1,0 +1,3 @@
+config:
+  azure-native:location: CentralUS
+  4-configuration:storage-sku: Standard_GRS

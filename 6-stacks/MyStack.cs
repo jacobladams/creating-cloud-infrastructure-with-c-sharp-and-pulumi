@@ -21,18 +21,18 @@ class MyStack : Stack
         };
 
         // Create an Azure Resource Group
-        var resourceGroup = new ResourceGroup($"rg-{Pulumi.Deployment.Instance.ProjectName}", new ResourceGroupArgs
+        var resourceGroup = new ResourceGroup("rg-pulumi-demo", new ResourceGroupArgs
         {
             Tags = commonTags
         });
 
 
-        var databaseAccount = new DatabaseAccount("cosmos-directory", new DatabaseAccountArgs
+        var databaseAccount = new DatabaseAccount("databaseaccount", new DatabaseAccountArgs
         {
             // AccountName = "ddb1",
             ApiProperties = new Pulumi.AzureNative.DocumentDB.Inputs.ApiPropertiesArgs
             {
-                ServerVersion = "4.0",
+                ServerVersion = "3.2",
             },
             // BackupPolicy = new Pulumi.AzureNative.DocumentDB.Inputs.PeriodicModeBackupPolicyArgs
             // {
@@ -83,21 +83,21 @@ class MyStack : Stack
             // KeyVaultKeyUri = "https://myKeyVault.vault.azure.net",
             Kind = "MongoDB",
             // Location = "westus",
-            // Locations = 
-            // {
-            //     new Pulumi.AzureNative.DocumentDB.Inputs.LocationArgs
-            //     {
-            //         FailoverPriority = 0,
-            //         IsZoneRedundant = false,
-            //         LocationName = "northcentralus",
-            //     },
-            //     new Pulumi.AzureNative.DocumentDB.Inputs.LocationArgs
-            //     {
-            //         FailoverPriority = 1,
-            //         IsZoneRedundant = false,
-            //         LocationName = "southcentralus",
-            //     },
-            // },
+            Locations = 
+            {
+                new Pulumi.AzureNative.DocumentDB.Inputs.LocationArgs
+                {
+                    FailoverPriority = 0,
+                    IsZoneRedundant = false,
+                    LocationName = "northcentralus",
+                },
+                new Pulumi.AzureNative.DocumentDB.Inputs.LocationArgs
+                {
+                    FailoverPriority = 1,
+                    IsZoneRedundant = false,
+                    LocationName = "eastus",
+                },
+            },
             // NetworkAclBypass = "AzureServices",
             // NetworkAclBypassResourceIds = 
             // {
@@ -139,7 +139,7 @@ class MyStack : Stack
 
 
         // Create an Azure resource (Storage Account)
-        var storageAccount = new StorageAccount("stdirectory", new StorageAccountArgs
+        var storageAccount = new StorageAccount("sadirectory", new StorageAccountArgs
         {
             ResourceGroupName = resourceGroup.Name,
             Sku = new SkuArgs
