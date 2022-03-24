@@ -1,4 +1,3 @@
-using System.Resources;
 using System.Collections.Generic;
 using Pulumi;
 using Pulumi.AzureNative.DocumentDB;
@@ -30,69 +29,19 @@ class MyStack : Stack
             Tags = commonTags
         });
 
-
         var databaseAccount = new DatabaseAccount("cosmos-directory", new DatabaseAccountArgs
         {
-            // AccountName = "ddb1",
             ApiProperties = new Pulumi.AzureNative.DocumentDB.Inputs.ApiPropertiesArgs
             {
                 ServerVersion = "4.0",
             },
-            // BackupPolicy = new Pulumi.AzureNative.DocumentDB.Inputs.PeriodicModeBackupPolicyArgs
-            // {
-            //     PeriodicModeProperties = new Pulumi.AzureNative.DocumentDB.Inputs.PeriodicModePropertiesArgs
-            //     {
-            //         BackupIntervalInMinutes = 240,
-            //         BackupRetentionIntervalInHours = 8,
-            //     },
-            //     Type = "Periodic",
-            // },
-            // ConsistencyPolicy = new Pulumi.AzureNative.DocumentDB.Inputs.ConsistencyPolicyArgs
-            // {
-            //     DefaultConsistencyLevel = DefaultConsistencyLevel.BoundedStaleness,
-            //     MaxIntervalInSeconds = 10,
-            //     MaxStalenessPrefix = 200,
-            // },
             ConsistencyPolicy = new Pulumi.AzureNative.DocumentDB.Inputs.ConsistencyPolicyArgs
             {
                 DefaultConsistencyLevel = DefaultConsistencyLevel.Session,
-                // MaxIntervalInSeconds = 10,
-                // MaxStalenessPrefix = 200,
             },
-            // Cors = 
-            // {
-            //     new Pulumi.AzureNative.DocumentDB.Inputs.CorsPolicyArgs
-            //     {
-            //         AllowedOrigins = "https://test",
-            //     },
-            // },
             DatabaseAccountOfferType = DatabaseAccountOfferType.Standard,
-            // DefaultIdentity = "FirstPartyIdentity",
-            // EnableAnalyticalStorage = true,
             EnableFreeTier = true,
-            // Identity = new Pulumi.AzureNative.DocumentDB.Inputs.ManagedServiceIdentityArgs
-            // {
-            //     Type = "SystemAssigned,UserAssigned",
-            //     UserAssignedIdentities = 
-            //     {
-            //         { "/subscriptions/fa5fc227-a624-475e-b696-cdd604c735bc/resourceGroups/eu2cgroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1",  },
-            //     },
-            // },
-            // IpRules = 
-            // {
-            //     new AzureNative.DocumentDB.Inputs.IpAddressOrRangeArgs
-            //     {
-            //         IpAddressOrRange = "23.43.230.120",
-            //     },
-            //     new AzureNative.DocumentDB.Inputs.IpAddressOrRangeArgs
-            //     {
-            //         IpAddressOrRange = "110.12.240.0/12",
-            //     },
-            // },
-            // IsVirtualNetworkFilterEnabled = true,
-            // KeyVaultKeyUri = "https://myKeyVault.vault.azure.net",
             Kind = "MongoDB",
-            // Location = "westus",
             Locations =
             {
                 new Pulumi.AzureNative.DocumentDB.Inputs.LocationArgs
@@ -108,32 +57,15 @@ class MyStack : Stack
                     LocationName = "southcentralus",
                 },
             },
-            // NetworkAclBypass = "AzureServices",
-            // NetworkAclBypassResourceIds = 
-            // {
-            //     "/subscriptions/subId/resourcegroups/rgName/providers/Microsoft.Synapse/workspaces/workspaceName",
-            // },
             PublicNetworkAccess = "Enabled",
             ResourceGroupName = resourceGroup.Name,
             Tags = commonTags,
-            //             VirtualNetworkRules = 
-            //             {
-            //                 new AzureNative.DocumentDB.Inputs.VirtualNetworkRuleArgs
-            //                 {
-            //                     Id = "/subscriptions/subId/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1",
-            //                     IgnoreMissingV
-
-            // NetServiceEndpoint = false,
-            //                 },
-            //             },
         });
 
         var mongoDBResourceMongoDBDatabase = new MongoDBResourceMongoDBDatabase("mongoDBResourceMongoDBDatabase", new MongoDBResourceMongoDBDatabaseArgs
         {
             AccountName = databaseAccount.Name,
             DatabaseName = "directory",
-            // Location = "West US",
-            // Options = ,
             Resource = new Pulumi.AzureNative.DocumentDB.Inputs.MongoDBDatabaseResourceArgs
             {
                 Id = "directory",
@@ -148,49 +80,15 @@ class MyStack : Stack
             AccountName = databaseAccount.Name,
             CollectionName = "items",
             DatabaseName = mongoDBResourceMongoDBDatabase.Name,
-            // Location = "West US",
-            // Options = ,
             Resource = new Pulumi.AzureNative.DocumentDB.Inputs.MongoDBCollectionResourceArgs
             {
                 Id = "items",
-                //     Indexes = 
-                //     {
-                //         new AzureNative.DocumentDB.Inputs.MongoIndexArgs
-                //         {
-                //             Key = new AzureNative.DocumentDB.Inputs.MongoIndexKeysArgs
-                //             {
-                //                 Keys = 
-                //                 {
-                //                     "testKey",
-                //                 },
-                //             },
-                //             Options = new AzureNative.DocumentDB.Inputs.MongoIndexOptionsArgs
-                //             {
-                //                 ExpireAfterSeconds = 100,
-                //                 Unique = true,
-                //             },
-                //         },
-                //     },
-                //     ShardKey = 
-                //     {
-                //         { "testKey", "Hash" },
-                //     },
             },
             ResourceGroupName = resourceGroup.Name,
             Tags = commonTags,
         });
 
-        this.ConnectionString = Output.All(databaseAccount.Name, resourceGroup.Name).Apply(items =>
-        {
-            string accountName = items[0];
-            string resourceGroupName = items[1];
-            return Pulumi.AzureNative.DocumentDB.ListDatabaseAccountConnectionStrings.Invoke(new ListDatabaseAccountConnectionStringsInvokeArgs
-            {
-                AccountName = accountName,
-                ResourceGroupName = resourceGroupName
-            }).Apply(connectionStrings => connectionStrings.ConnectionStrings[0].ConnectionString);
-        });
-
+        this.ConnectionString = CreateCosmosConnectionString(resourceGroup.Name, databaseAccount.Name);
 
         var appServicePlan = new AppServicePlan("plan-", new AppServicePlanArgs
         {
@@ -229,15 +127,6 @@ class MyStack : Stack
 
         // var codeBlobUrl = SignedBlobReadUrl(blob, container, storageAccount, resourceGroup);
 
-        // Application insights
-        // var appInsights = new Component("appInsights", new ComponentArgs
-        // {
-        //     ApplicationType = ApplicationType.Web,
-        //     Kind = "web",
-        //     ResourceGroupName = resourceGroup.Name,
-        // });
-
-
         var apistorageAccount = new StorageAccount("stapi", new StorageAccountArgs
         {
             ResourceGroupName = resourceGroup.Name,
@@ -247,7 +136,6 @@ class MyStack : Stack
             },
             Kind = Pulumi.AzureNative.Storage.Kind.StorageV2,
         });
-
 
         var api = new WebApp("func-", new WebAppArgs
         {
@@ -262,7 +150,7 @@ class MyStack : Stack
                 {
                     new NameValuePairArgs{
                         Name = "AzureWebJobsStorage",
-                        Value = GetConnectionString(resourceGroup.Name, apistorageAccount.Name),
+                        Value = GetStorageConnectionString(resourceGroup.Name, apistorageAccount.Name),
                     },
                     new NameValuePairArgs{
                         Name = "FUNCTIONS_EXTENSION_VERSION",
@@ -276,7 +164,6 @@ class MyStack : Stack
                         Name = "MongoConnectionString",
                         Value = ConnectionString,
                     },
-
                 },
             },
             Tags = commonTags
@@ -307,26 +194,8 @@ class MyStack : Stack
 
         string webFiles = Path.GetFullPath(@"..\CompanyDirectory.Web\bin\release\net6.0\publish\wwwroot");
 
-        System.Console.WriteLine(webFiles);
-
-        // new DirectoryInfo(webFiles).EnumerateFiles("*.*", SearchOption.AllDirectories)
-        //       .Select(file => new Blob(Path.GetRelativePath(webFiles, file.FullName),
-        //          new BlobArgs
-        //          {
-        //              ResourceGroupName = resourceGroup.Name,
-        //              AccountName = storageAccount.Name,
-        //              ContainerName = staticWebsite.ContainerName,
-        //              Type = BlobType.Block,
-        //              Source = new FileAsset(file.FullName),
-        //              ContentType = MimeTypeMap.GetMimeType(file.Extension)
-        //          })
-        //      );
-        // Directory.EnumerateFiles(webFiles, "*.*", new EnumerationOptions(){RecurseSubdirectories= true})
         new DirectoryInfo(webFiles).EnumerateFiles("*.*", SearchOption.AllDirectories)
-              .Select(file =>
-              {
-                  System.Console.WriteLine(file.FullName);
-                  return new Blob(Path.GetRelativePath(webFiles, file.FullName),
+              .Select(file => new Blob(Path.GetRelativePath(webFiles, file.FullName),
                     new BlobArgs
                     {
                         ResourceGroupName = resourceGroup.Name,
@@ -335,26 +204,10 @@ class MyStack : Stack
                         Type = BlobType.Block,
                         Source = new FileAsset(file.FullName),
                         ContentType = MimeTypeMap.GetMimeType(file.Extension)
-                    });
-
-              }
+                    })
              ).ToList();
 
         this.WebsiteUrl = storageAccount.PrimaryEndpoints.Apply(primaryEndpoints => primaryEndpoints.Web);
-
-
-
-        // var indexBlob = new Blob("index.html", new BlobArgs
-        // {
-        //     ResourceGroupName = resourceGroup.Name,
-        //     AccountName = storageAccount.Name,
-        //     ContainerName = staticWebsite.ContainerName,
-        //     Type = BlobType.Block,
-        //     Source = new StringAsset("<html><body><h1>Hello World</h1></body></html>"),
-        //     ContentType = "text/html"
-        // });
-
-        // string apiUrl = Output.Format($"https://{api.DefaultHostName}/api/Hello?name=Pulumi") ;
 
         new Blob("settings.json", new BlobArgs
         {
@@ -366,21 +219,12 @@ class MyStack : Stack
             ContentType = "application/json"
         });
 
-
-
         this.Endpoint = Output.Format($"https://{api.DefaultHostName}/api/Hello?name=Pulumi");
 
-
         this.WebsiteUrl = storageAccount.PrimaryEndpoints.Apply(primaryEndpoints => primaryEndpoints.Web);
-
-
-        // {
-        //     public static Task<ListDatabaseAccountConnectionStringsResult> InvokeAsync(ListDatabaseAccountConnectionStringsArgs args, InvokeOptions? opts = null)
-        //     public static Output<ListDatabaseAccountConnectionStringsResult> Invoke(ListDatabaseAccountConnectionStringsInvokeArgs args, InvokeOptions? opts = null)
-        // }
     }
 
-    private static Output<string> GetConnectionString(Input<string> resourceGroupName, Input<string> accountName)
+    private static Output<string> GetStorageConnectionString(Input<string> resourceGroupName, Input<string> accountName)
     {
         // Retrieve the primary storage account key.
         var storageAccountKeys = ListStorageAccountKeys.Invoke(new ListStorageAccountKeysInvokeArgs
@@ -395,6 +239,20 @@ class MyStack : Stack
 
             // Build the connection string to the storage account.
             return Output.Format($"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={primaryStorageKey}");
+        });
+    }
+
+    private static Output<string> CreateCosmosConnectionString(Input<string> resourceGroupName, Input<string> databaseAccountName)
+    {
+        return  Output.All(databaseAccountName, resourceGroupName).Apply(items =>
+        {
+            string accountName = items[0];
+            string resourceGroupName = items[1];
+            return Pulumi.AzureNative.DocumentDB.ListDatabaseAccountConnectionStrings.Invoke(new ListDatabaseAccountConnectionStringsInvokeArgs
+            {
+                AccountName = accountName,
+                ResourceGroupName = resourceGroupName
+            }).Apply(connectionStrings => connectionStrings.ConnectionStrings[0].ConnectionString);
         });
     }
 
