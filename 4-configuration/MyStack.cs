@@ -48,16 +48,18 @@ class MyStack : Stack
 
         });
 
-        Directory.EnumerateFiles("wwwroot").Select(file => new Blob(Path.GetFileName(file), new BlobArgs
-        {
-            ResourceGroupName = resourceGroup.Name,
-            AccountName = storageAccount.Name,
-            ContainerName = staticWebsite.ContainerName,
-            Type = BlobType.Block,
-            Source = new FileAsset(file),
-            ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(file))
-        }));
-
+        new DirectoryInfo("wwwroot").EnumerateFiles("*.*", SearchOption.AllDirectories)
+             .Select(file=> new Blob(Path.GetRelativePath(wwwRoot.FullName, file.FullName), 
+                new BlobArgs
+                {
+                    ResourceGroupName = resourceGroup.Name,
+                    AccountName = storageAccount.Name,
+                    ContainerName = staticWebsite.ContainerName,
+                    Type = BlobType.Block,
+                    Source = new FileAsset(file.FullName),
+                    ContentType = MimeTypeMap.GetMimeType(file.Extension)
+                })
+            ).ToList();
         this.WebsiteUrl = storageAccount.PrimaryEndpoints.Apply(primaryEndpoints => primaryEndpoints.Web);
     }
 

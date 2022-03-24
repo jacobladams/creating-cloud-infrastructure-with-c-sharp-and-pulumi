@@ -64,7 +64,7 @@ class MyStack : Stack
                 //     Type = BlobType.Block,
                 //     Source = new FileAsset(file.FullName),
                 //     ContentType = MimeTypeMap.GetMimeType(file.Extension)
-        // }));
+        // })).ToList();
 
         this.WebsiteUrl = storageAccount.PrimaryEndpoints.Apply(primaryEndpoints => primaryEndpoints.Web);
     }
