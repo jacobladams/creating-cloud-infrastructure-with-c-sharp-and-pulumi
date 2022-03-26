@@ -29,7 +29,7 @@ class MyStack : Stack
             Tags = commonTags
         });
 
-        var databaseAccount = new DatabaseAccount("cosmos-directory", new DatabaseAccountArgs
+        var databaseAccount = new DatabaseAccount($"cosmos-{Pulumi.Deployment.Instance.ProjectName}", new DatabaseAccountArgs
         {
             ApiProperties = new Pulumi.AzureNative.DocumentDB.Inputs.ApiPropertiesArgs
             {
@@ -62,7 +62,7 @@ class MyStack : Stack
             Tags = commonTags,
         });
 
-        var mongoDBResourceMongoDBDatabase = new MongoDBResourceMongoDBDatabase("mongoDBResourceMongoDBDatabase", new MongoDBResourceMongoDBDatabaseArgs
+        var mongoDBResourceMongoDBDatabase = new MongoDBResourceMongoDBDatabase("database", new MongoDBResourceMongoDBDatabaseArgs
         {
             AccountName = databaseAccount.Name,
             DatabaseName = "directory",
@@ -75,7 +75,7 @@ class MyStack : Stack
             Tags = commonTags
         });
 
-        var mongoDBResourceMongoDBCollection = new MongoDBResourceMongoDBCollection("mongoDBResourceMongoDBCollection", new MongoDBResourceMongoDBCollectionArgs
+        var mongoDBResourceMongoDBCollection = new MongoDBResourceMongoDBCollection("collection", new MongoDBResourceMongoDBCollectionArgs
         {
             AccountName = databaseAccount.Name,
             CollectionName = "items",
@@ -135,6 +135,7 @@ class MyStack : Stack
                 Name = SkuName.Standard_LRS,
             },
             Kind = Pulumi.AzureNative.Storage.Kind.StorageV2,
+            Tags = commonTags,
         });
 
         var api = new WebApp("func-", new WebAppArgs
@@ -170,7 +171,7 @@ class MyStack : Stack
         });
 
         // Create an Azure resource (Storage Account)
-        var storageAccount = new StorageAccount("stdirectory", new StorageAccountArgs
+        var storageAccount = new StorageAccount("stweb", new StorageAccountArgs
         {
             ResourceGroupName = resourceGroup.Name,
             Sku = new SkuArgs
@@ -185,7 +186,7 @@ class MyStack : Stack
             Tags = commonTags
         });
 
-        var staticWebsite = new StorageAccountStaticWebsite("stapp-company-directory", new StorageAccountStaticWebsiteArgs
+        var staticWebsite = new StorageAccountStaticWebsite($"stapp-{Pulumi.Deployment.Instance.ProjectName}", new StorageAccountStaticWebsiteArgs
         {
             ResourceGroupName = resourceGroup.Name,
             AccountName = storageAccount.Name,

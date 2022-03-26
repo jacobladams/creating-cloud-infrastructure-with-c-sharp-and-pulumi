@@ -1,0 +1,3 @@
+name: 8-Import
+runtime: dotnet
+description: A minimal Azure Native C# Pulumi program

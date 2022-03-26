@@ -1,0 +1,5 @@
+pulumi import azure-native:storage:StorageAccount samanualdemo7654321 /subscriptions/{subscription-id}/resourceGroups/rgmanual/providers/Microsoft.Storage/storageAccounts/samanualdemo7654321
+
+tf2pulumi --target-language csharp
+
+https://www.pulumi.com/tf2pulumi/

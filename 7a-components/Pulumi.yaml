@@ -1,0 +1,5 @@
+name: 7-components
+runtime: dotnet
+description: A minimal Azure Native C# Pulumi program
+
+
