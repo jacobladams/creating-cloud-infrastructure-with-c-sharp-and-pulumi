@@ -48,8 +48,11 @@ class MyStack : Stack
 
         });
 
-        new DirectoryInfo("wwwroot").EnumerateFiles("*.*", SearchOption.AllDirectories)
-             .Select(file=> new Blob(Path.GetRelativePath(wwwRoot.FullName, file.FullName), 
+        string webFiles = Path.GetFullPath(@"wwwroot");
+
+
+        new DirectoryInfo(webFiles).EnumerateFiles("*.*", SearchOption.AllDirectories)
+             .Select(file=> new Blob(Path.GetRelativePath(webFiles, file.FullName), 
                 new BlobArgs
                 {
                     ResourceGroupName = resourceGroup.Name,

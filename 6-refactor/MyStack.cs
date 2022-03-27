@@ -14,7 +14,7 @@ class MyStack : Stack
         var commonTags = new Dictionary<string, string>
         {
             {"workload", Pulumi.Deployment.Instance.ProjectName},
-            {"environment", "dev"},
+            {"environment", Pulumi.Deployment.Instance.StackName},
             {"cost center", "IT"},
             {"owner", "Jake Adams"},
             {"demo", "true"}
