@@ -17,3 +17,4 @@ make change
 destroy
 show generated arm template
 show pulumi cloud
+mention random suffix

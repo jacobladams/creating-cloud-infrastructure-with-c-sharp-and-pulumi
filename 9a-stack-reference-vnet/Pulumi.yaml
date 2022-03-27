@@ -1,3 +1,3 @@
-name: 8-import
+name: 9a-stack-reference-vnet
 runtime: dotnet
 description: A minimal Azure Native C# Pulumi program
