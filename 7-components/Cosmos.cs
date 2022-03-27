@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 class Cosmos
 {
-    public Output<string> DatabaseAccountName { get; private set; }
+    public Output<string> ConnectionString { get; private set; }
 
     public Cosmos(Input<string> resourceGroupName, string name, Pulumi.Resource parent, Dictionary<string, string> commonTags)
     {
@@ -68,7 +68,7 @@ class Cosmos
             Tags = commonTags
         }, new CustomResourceOptions { Parent = parent });
 
-        DatabaseAccountName = databaseAccount.Name;
+        ConnectionString = CreateCosmosConnectionString(resourceGroupName, databaseAccount.Name);
 
     }
 

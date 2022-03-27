@@ -58,7 +58,7 @@ class Function
             {
                 Name = SkuName.Standard_LRS,
             },
-            Kind = Pulumi.AzureNative.Storage.Kind.StorageV2
+            Kind = Pulumi.AzureNative.Storage.Kind.StorageV2,
             Tags = commonTags,
         });
 

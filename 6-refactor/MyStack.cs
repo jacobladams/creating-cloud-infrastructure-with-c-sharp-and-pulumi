@@ -28,8 +28,7 @@ class MyStack : Stack
 
         var cosmos = new Cosmos(resourceGroup.Name, commonTags);
 
-        this.ConnectionString = CreateCosmosConnectionString(resourceGroup.Name, cosmos.DatabaseAccountName);
-
+        this.ConnectionString = cosmos.ConnectionString;
 
         var function = new Function(resourceGroup.Name, this.ConnectionString, commonTags);
 

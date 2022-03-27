@@ -4,11 +4,10 @@ using System.Collections.Generic;
 
 class Cosmos
 {
-    public Output<string> DatabaseAccountName { get; private set; }
+    public Output<string> ConnectionString { get; private set; }
 
     public Cosmos(Input<string> resourceGroupName, Dictionary<string, string> commonTags)
     {
-
         var databaseAccount = new DatabaseAccount($"cosmos-{Pulumi.Deployment.Instance.ProjectName}", new DatabaseAccountArgs
         {
             ApiProperties = new Pulumi.AzureNative.DocumentDB.Inputs.ApiPropertiesArgs
@@ -68,7 +67,7 @@ class Cosmos
             Tags = commonTags,
         });
 
-        DatabaseAccountName = databaseAccount.Name;
+        ConnectionString = CreateCosmosConnectionString(resourceGroupName, databaseAccount.Name);
 
     }
 
