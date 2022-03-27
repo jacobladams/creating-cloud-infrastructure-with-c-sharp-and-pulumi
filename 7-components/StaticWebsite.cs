@@ -62,8 +62,6 @@ class StaticWebsite
             AccountName = storageAccount.Name,
             ContainerName = staticWebsite.ContainerName,
             Type = BlobType.Block,
-            // Source = api.DefaultHostName.Apply(hostName => (Pulumi.AssetOrArchive)new StringAsset($"{{\"api\":\"https://{hostName}/api/Hello?name=Pulumi\"}}")),
-            // Source = new StringAsset(apiUrl.),
             Source = apiUrl.ToOutput().Apply(url => (Pulumi.AssetOrArchive)new StringAsset($"{{\"api\":\"{url}\"}}"))
         }, new CustomResourceOptions { Parent = parent });
     }

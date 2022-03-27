@@ -94,7 +94,7 @@ class Function
             Tags = commonTags
         });
 
-        this.Url = Output.Format($"https://{api.DefaultHostName}/api/Hello?name=Pulumi");
+        this.Url = Output.Format($"https://{api.DefaultHostName}/api");
 
     }
 

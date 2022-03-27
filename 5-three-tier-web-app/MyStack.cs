@@ -62,10 +62,10 @@ class MyStack : Stack
             Tags = commonTags,
         });
 
-        var mongoDBResourceMongoDBDatabase = new MongoDBResourceMongoDBDatabase("database", new MongoDBResourceMongoDBDatabaseArgs
+        var mongoDBResourceMongoDBDatabase = new MongoDBResourceMongoDBDatabase("directory", new MongoDBResourceMongoDBDatabaseArgs
         {
             AccountName = databaseAccount.Name,
-            DatabaseName = "directory",
+            // DatabaseName = "directory",
             Resource = new Pulumi.AzureNative.DocumentDB.Inputs.MongoDBDatabaseResourceArgs
             {
                 Id = "directory",
@@ -75,14 +75,14 @@ class MyStack : Stack
             Tags = commonTags
         });
 
-        var mongoDBResourceMongoDBCollection = new MongoDBResourceMongoDBCollection("collection", new MongoDBResourceMongoDBCollectionArgs
+        var mongoDBResourceMongoDBCollection = new MongoDBResourceMongoDBCollection("personnel", new MongoDBResourceMongoDBCollectionArgs
         {
             AccountName = databaseAccount.Name,
-            CollectionName = "items",
+            // CollectionName = "personnel",
             DatabaseName = mongoDBResourceMongoDBDatabase.Name,
             Resource = new Pulumi.AzureNative.DocumentDB.Inputs.MongoDBCollectionResourceArgs
             {
-                Id = "items",
+                Id = "personnel",
             },
             ResourceGroupName = resourceGroup.Name,
             Tags = commonTags,
@@ -93,39 +93,18 @@ class MyStack : Stack
         var appServicePlan = new AppServicePlan("plan-", new AppServicePlanArgs
         {
             ResourceGroupName = resourceGroup.Name,
-
             // Run on Linux
             Kind = "Linux",
-
             // Consumption plan SKU
             Sku = new SkuDescriptionArgs
             {
                 Tier = "Dynamic",
                 Name = "Y1"
             },
-
             // For Linux, you need to change the plan to have Reserved = true property.
             Reserved = true,
             Tags = commonTags
         });
-
-        // var container = new BlobContainer("zips-container", new BlobContainerArgs
-        // {
-        //     AccountName = storageAccount.Name,
-        //     PublicAccess = PublicAccess.None,
-        //     ResourceGroupName = resourceGroup.Name,
-        // });
-
-        // var blob = new Blob("zip", new BlobArgs
-        // {
-        //     AccountName = storageAccount.Name,
-        //     ContainerName = container.Name,
-        //     ResourceGroupName = resourceGroup.Name,
-        //     Type = BlobType.Block,
-        //     Source = new FileArchive("../CompanyDirectory.API/bin/debug")
-        // });
-
-        // var codeBlobUrl = SignedBlobReadUrl(blob, container, storageAccount, resourceGroup);
 
         var apistorageAccount = new StorageAccount("stapi", new StorageAccountArgs
         {
@@ -166,6 +145,10 @@ class MyStack : Stack
                         Value = ConnectionString,
                     },
                 },
+                Cors = new CorsSettingsArgs
+                {
+                    AllowedOrigins = "*"
+                }
             },
             Tags = commonTags
         });
@@ -216,11 +199,11 @@ class MyStack : Stack
             AccountName = storageAccount.Name,
             ContainerName = staticWebsite.ContainerName,
             Type = BlobType.Block,
-            Source = api.DefaultHostName.Apply(hostName => (Pulumi.AssetOrArchive)new StringAsset($"{{\"api\":\"https://{hostName}/api/Hello?name=Pulumi\"}}")),
+            Source = api.DefaultHostName.Apply(hostName => (Pulumi.AssetOrArchive)new StringAsset($"{{\"api\":\"https://{hostName}/api\"}}")),
             ContentType = "application/json"
         });
 
-        this.Endpoint = Output.Format($"https://{api.DefaultHostName}/api/Hello?name=Pulumi");
+        this.Endpoint = Output.Format($"https://{api.DefaultHostName}/api");
 
         this.WebsiteUrl = storageAccount.PrimaryEndpoints.Apply(primaryEndpoints => primaryEndpoints.Web);
     }

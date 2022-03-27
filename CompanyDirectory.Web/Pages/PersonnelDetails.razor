@@ -1,27 +1,28 @@
 ﻿@page "/personnel/{id:int}"
+@inject HttpClient Http
 
 <PageTitle>Personnel Details</PageTitle>
 
 
 <div>
-	<img src="{{personnelDirectory.personnel.image}}" />
+	<img src="@personnel.Image" />
 </div>
 <div>
 	<strong>Name: </strong>
-	{{personnelDirectory.personnel.firstName}} {{personnelDirectory.personnel.lastName}}
+	@personnel.FirstName @personnel.LastName
 </div>
 <div>
 	<strong>Title:</strong>
-	{{personnelDirectory.personnel.title}}
+	@personnel.Title
 </div>
 <div>
 	<strong>Is Active:</strong>
-	{{personnelDirectory.personnel.active}}
+	@personnel.Active
 </div>
 <div>
-	<a ng-href="{{personnelDirectory.personnel.detailsUrl}}">View Details</a>
+	<a href="@personnel.DetailsUrl">View Details</a>
 </div>
-<button ng-click="personnelDirectory.editPersonnel(personnelDirectory.personnel)">Edit</button>
+@*<button ng-click="personnelDirectory.editPersonnel(personnelDirectory.personnel)">Edit</button>*@
 
 @*<h3>PersonnelDetailsrazor</h3>
 
@@ -46,4 +47,15 @@
 @code {
 	[Parameter]
     public int? Id { get; set; }
+
+	private Personnel? personnel;
+
+    protected override async Task OnInitializedAsync()
+    {
+		var settings = await Http.GetFromJsonAsync<Settings>("settings.json");
+	   string apiUrl = settings.Api;
+
+       var personnelList = await Http.GetFromJsonAsync<Personnel[]>($"{apiUrl}/GetPersonnel");
+	   personnel = personnelList.First(p=>p.Id == Id);
+    }
 }

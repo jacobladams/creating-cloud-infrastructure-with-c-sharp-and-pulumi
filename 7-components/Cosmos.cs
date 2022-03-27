@@ -42,10 +42,9 @@ class Cosmos
             Tags = commonTags
         }, new CustomResourceOptions { Parent = parent });
 
-        var mongoDBResourceMongoDBDatabase = new MongoDBResourceMongoDBDatabase("database", new MongoDBResourceMongoDBDatabaseArgs
+        var mongoDBResourceMongoDBDatabase = new MongoDBResourceMongoDBDatabase("directory", new MongoDBResourceMongoDBDatabaseArgs
         {
             AccountName = databaseAccount.Name,
-            DatabaseName = "directory",
             Resource = new Pulumi.AzureNative.DocumentDB.Inputs.MongoDBDatabaseResourceArgs
             {
                 Id = "directory",
@@ -55,14 +54,13 @@ class Cosmos
             Tags = commonTags
         }, new CustomResourceOptions { Parent = parent });
 
-        var mongoDBResourceMongoDBCollection = new MongoDBResourceMongoDBCollection("collection", new MongoDBResourceMongoDBCollectionArgs
+        var mongoDBResourceMongoDBCollection = new MongoDBResourceMongoDBCollection("personnel", new MongoDBResourceMongoDBCollectionArgs
         {
             AccountName = databaseAccount.Name,
-            CollectionName = "items",
             DatabaseName = mongoDBResourceMongoDBDatabase.Name,
             Resource = new Pulumi.AzureNative.DocumentDB.Inputs.MongoDBCollectionResourceArgs
             {
-                Id = "items",
+                Id = "personnel",
             },
             ResourceGroupName = resourceGroupName,
             Tags = commonTags

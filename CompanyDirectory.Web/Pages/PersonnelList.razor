@@ -17,7 +17,6 @@
     <tbody>
 
 
-
         @foreach (var personnel in personnelList)
         {
             <tr>
@@ -30,24 +29,15 @@
 </table>
 
 @code {
-    private Personnel[]? personnelList;
+    private Personnel[]? personnelList = new Personnel[0];
 
     protected override async Task OnInitializedAsync()
     {
-        personnelList = await Http.GetFromJsonAsync<Personnel[]>("sample-data/personnel.json");
-    }
+        //personnelList = await Http.GetFromJsonAsync<Personnel[]>("sample-data/personnel.json");
 
-    public class Personnel
-    {
-        public int Id { get; set; }
+       var settings = await Http.GetFromJsonAsync<Settings>("settings.json");
+	   string apiUrl = settings.Api;
 
-        public string? Image { get; set; }
-
-        public string? FirstName { get; set; }
-
-        public string? LastName { get; set; }
-
-        public string? Title { get; set; }
-
+       personnelList = await Http.GetFromJsonAsync<Personnel[]>($"{apiUrl}/GetPersonnel");
     }
 }
